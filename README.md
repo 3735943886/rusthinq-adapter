@@ -29,13 +29,15 @@ git clone https://github.com/anszom/rethink ./rethink
 or as a submodule, if you'd rather pin a reviewable commit:
 
 ```sh
-git submodule add https://github.com/anszom/rethink rethink
+git submodule add -f https://github.com/anszom/rethink rethink
 git submodule update --init
 ```
 
 (Point either command at a fork's URL instead if you're carrying a fix not yet upstream.)
-`./rethink` is gitignored by this repo either way — nothing owned lives inside it, and a
-submodule is tracked as its own gitlink regardless of the ignore entry.
+`./rethink` is gitignored by this repo either way — nothing owned lives inside it. `-f` is
+required for the submodule case specifically because git refuses to add anything at a
+gitignored path without it, submodules included; it's expected here, not a sign of a
+misconfigured ignore.
 
 Keeping it fresh is entirely up to you: `git -C rethink pull` for a plain clone, or
 `git submodule update --remote` for a submodule. This repo does not check rethink's version or

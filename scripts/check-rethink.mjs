@@ -29,9 +29,10 @@ Bring one in yourself, either as a plain clone:
 
     git clone https://github.com/anszom/rethink ./rethink
 
-or as a submodule, if you'd rather pin a reviewable commit:
+or as a submodule, if you'd rather pin a reviewable commit (the -f is required because ./rethink
+is gitignored, which git otherwise refuses to add a path under - expected here, not a problem):
 
-    git submodule add https://github.com/anszom/rethink rethink
+    git submodule add -f https://github.com/anszom/rethink rethink
     git submodule update --init
 
 Point at a fork instead of upstream by using its URL in either command above.
