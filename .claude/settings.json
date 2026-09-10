@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init *)",
+      "Bash(npm install *)",
+      "Bash(docker info *)",
+      "Bash(ln -s ../rethink ./rethink)",
+      "Bash(node scripts/check-rethink.mjs)",
+      "Bash(timeout 5 npx tsx rusthinq-adapter.ts config.jsonc)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(timeout 4 node dist/rusthinq-adapter.js config.jsonc)",
+      "Bash(timeout 300 docker build -t rusthinq-adapter:test .)",
+      "Bash(rm rethink *)",
+      "Bash(rsync -a --exclude node_modules --exclude .git --exclude dist /home/ubuntu/script/git/rethink/ ./rethink/)",
+      "Bash(docker run *)",
+      "Bash(docker rm *)",
+      "Bash(docker rmi *)",
+      "Bash(git check-ignore *)"
+    ]
+  }
+}

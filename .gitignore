@@ -1,0 +1,21 @@
+node_modules
+*.key
+*.pem
+*.cert
+*.sw*
+*.csr
+*.crt
+dist
+state
+ha-state
+*.tsbuildinfo
+npm-debug.log*
+.DS_Store
+
+# The actual runtime config (`cp rusthinq-adapter-config.jsonc config.jsonc`, per README) holds
+# real mqtt/HA credentials - only the checked-in template is tracked.
+/config.jsonc
+
+# The user's own rethink checkout - a plain `git clone` or a `git submodule add`, either way
+# not owned or committed by this repo. See README for setup.
+/rethink/

@@ -1,0 +1,11 @@
+.git
+node_modules
+dist
+state
+ha-state
+npm-debug.log*
+*.tsbuildinfo
+.DS_Store
+
+# rethink/ is deliberately NOT ignored here - it must be present in the build context (the user's
+# own clone or submodule) for `docker build` to copy in and compile against.

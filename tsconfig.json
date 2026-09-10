@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "outDir": "dist",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "lib": ["es2021"],
+    "target": "es2021",
+
+    // "@/*" matches the alias rethink's own code is written against - pointing it at ./rethink/
+    // means those files never need editing, whatever checkout the user drops in there.
+    "paths": { "@/*": ["./rethink/*"] },
+
+    "strict": true,
+    "noUncheckedSideEffectImports": true,
+    "skipLibCheck": true
+  },
+
+  // Root files are this repo's own code only - unlike rusthinq-adapter.old's curated
+  // vendor/rethink/ (just the files it listed), ./rethink/ here is the user's full checkout, and
+  // a "./**/*.ts" include would make tsc root (and type-check standalone) every file in it -
+  // rethink's own tests/tools/management/etc included, some needing devDependencies this repo
+  // deliberately doesn't have. Files rethink code actually needs still get type-checked normally,
+  // as imports reachable from these roots via the "@/*" alias below.
+  // rethink/types/*.d.ts is the one exception: ambient module declarations (e.g. augmenting
+  // 'mqtt-connection', which ships no types of its own) aren't picked up just by being imported
+  // like the rest of rethink's code - they only take effect as tsc roots, same as rethink's own
+  // tsconfig.json treats them.
+  "include": ["./*.ts", "./cloud/**/*.ts", "./scripts/**/*.ts", "./tests/**/*.ts", "./rethink/types/**/*.d.ts"],
+  "exclude": ["dist", "node_modules"],
+
+  "tsc-alias": {
+    "resolveFullPaths": true
+  }
+}
