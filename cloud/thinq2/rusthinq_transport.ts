@@ -33,6 +33,10 @@ export type RusthinqTransportConfig = {
      * rusthinq's own MILESTONES.md/raw_bus.rs: this is a trusted local-tooling surface, not meant
      * to be exposed beyond a firewalled broker - the same assumption this process makes. */
     raw_prefix: string
+    /* Device ids this source ignores entirely: no `newDevice`, and their raw frames are dropped.
+     * For handing a single appliance to another driver (say a rusthinq `.rhai` script) while this
+     * adapter keeps driving the rest - two unaware drivers must not both write to one device. */
+    skip_ids?: string[]
 }
 
 type DeviceSnapshotEntry = {
@@ -149,6 +153,7 @@ export class RusthinqTransportSource extends TypedEmitter<SourceEvents> {
         const seen = new Set<string>()
         for (const [id, info] of Object.entries(snapshot.devices ?? {})) {
             if (info.platform !== 'thinq2') continue
+            if (this.config.skip_ids?.includes(id)) continue
             seen.add(id)
             if (this.devices.has(id)) continue
 

@@ -56,6 +56,27 @@ describe('RusthinqTransportSource', () => {
         assert.deepEqual(seen, ['dev1'])
     })
 
+    test('a device listed in skip_ids never becomes a device, and its frames are dropped', () => {
+        const { client } = fakeClient()
+        const source = new RusthinqTransportSource({ ...CONFIG, skip_ids: ['dev2'] }, () => client as never)
+        const seen: string[] = []
+        source.on('newDevice', (dev) => seen.push(dev.id))
+
+        client.emit(
+            'message',
+            'rusthinq/devices',
+            Buffer.from(
+                snapshot({
+                    dev1: { model: 'CST_570004_WW', platform: 'thinq2' },
+                    dev2: { model: 'DHUM_056905_WW', platform: 'thinq2' },
+                }),
+            ),
+        )
+        client.emit('message', 'rusthinq-raw/dev2/raw/rx', Buffer.from('cafe01'))
+
+        assert.deepEqual(seen, ['dev1'])
+    })
+
     test('a device dropped from the snapshot gets its close event fired', () => {
         const { client } = fakeClient()
         const source = new RusthinqTransportSource(CONFIG, () => client as never)

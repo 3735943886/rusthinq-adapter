@@ -16,7 +16,8 @@
     "mqtt_user": "",
     "mqtt_pass": "",
     "rusthinq_prefix": "rusthinq", // rusthinq's [mqtt] rusthinq_prefix
-    "raw_prefix": "rusthinq-raw" // rusthinq's [mqtt] raw_prefix - must be set there, along with raw = ["rx", "inject", "inject_clip"]
+    "raw_prefix": "rusthinq-raw", // rusthinq's [mqtt] raw_prefix - must be set there, along with raw = ["rx", "inject", "inject_clip"]
+    "skip_ids": [] // device ids this adapter leaves alone (e.g. ones a rusthinq .rhai script drives instead)
   },
 
   "bridge": {
