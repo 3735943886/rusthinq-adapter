@@ -6,7 +6,8 @@
 // Runs as its own OS process, independent of rusthinq-cloud - the two only ever touch each other
 // through the shared MQTT broker, so this can be started, stopped, and redeployed on its own
 // schedule. Point rusthinq's config.toml `[mqtt] raw_prefix` and this file's `rusthinq` config
-// section at the same value and broker; nothing in rusthinq itself needs to change.
+// section at the same value and broker, and set `raw = ["rx", "inject", "inject_clip"]` there
+// (rusthinq turns every raw stream off unless listed).
 //
 // Only Thinq2 device models are handled - see RusthinqTransportSource's note on why Thinq1 is
 // out of scope for now.

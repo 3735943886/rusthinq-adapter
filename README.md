@@ -56,8 +56,24 @@ npm run dev -- config.jsonc
 ```
 
 Point rusthinq's `config.toml` `[mqtt] raw_prefix` and this project's `rusthinq`
-config section at the same broker and prefix; nothing in rusthinq itself needs to
-change.
+config section at the same broker and prefix, and list the raw streams this adapter
+uses in rusthinq's `[mqtt] raw` (rusthinq turns every raw stream off unless listed):
+
+```toml
+[mqtt]
+raw_prefix = "rusthinq-raw"
+raw = ["rx", "inject", "inject_clip"]
+```
+
+| stream | topic | used for |
+|---|---|---|
+| `rx` | `<raw_prefix>/<id>/raw/rx` | frames from the appliance |
+| `inject` | `<raw_prefix>/<id>/raw/inject/set` | commands to the appliance |
+| `inject_clip` | `<raw_prefix>/<id>/raw/inject/clip/set` | the one-off `setMaskingInfo` CLIP command |
+
+Without `inject_clip` the converters still work, but only see values as often as they poll.
+Needs a rusthinq build whose raw topics are laid out this way (`raw/inject/clip/set`; older
+builds had `raw/inject-clip/set`).
 
 ### Running 24/7
 

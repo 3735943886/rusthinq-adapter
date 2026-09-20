@@ -16,7 +16,7 @@
     "mqtt_user": "",
     "mqtt_pass": "",
     "rusthinq_prefix": "rusthinq", // rusthinq's [mqtt] rusthinq_prefix
-    "raw_prefix": "rusthinq-raw" // rusthinq's [mqtt] raw_prefix - must be set there for this to work
+    "raw_prefix": "rusthinq-raw" // rusthinq's [mqtt] raw_prefix - must be set there, along with raw = ["rx", "inject", "inject_clip"]
   },
 
   "bridge": {

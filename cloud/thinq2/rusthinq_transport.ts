@@ -49,7 +49,7 @@ type DeviceSnapshot = {
 
 /*
  * Stands in for thinq2/device.ts's `Device`. `send()` - the JSON CLIP-command path, as opposed to
- * `send_packet()`'s raw TLV bytes - publishes to raw_bus's `raw/inject-clip` leaf (as opposed to
+ * `send_packet()`'s raw TLV bytes - publishes to raw_bus's `raw/inject/clip` leaf (as opposed to
  * `raw/inject`'s raw hex), which raw_bus.rs::register_inject decodes as JSON `{cmd, type, data}`
  * and dispatches as `SendToDevice::T2Clip`. The only caller of `send()` in this codebase is
  * `ACDevice.valuesReceived()`'s one-shot `setMaskingInfo` (clears the TLV notification blacklist so
@@ -70,10 +70,10 @@ class RusthinqTransportDevice extends TypedEmitter<DeviceEvents> {
     send(cmd: string, type: number, data: string | object) {
         // MqttSink::handle_message only dispatches to on_set_property (which is what
         // raw_bus.rs::register_inject listens on) when the topic's last segment is
-        // literally "set" - the "raw/inject-clip" prop name comes from stripping that segment
+        // literally "set" - the "raw/inject/clip" prop name comes from stripping that segment
         // off, not from the topic itself. Publishing without it is silently dropped:
         // register_inject never sees it, and there's no error path back to us.
-        this.publishLeaf('raw/inject-clip/set', JSON.stringify({ cmd, type, data }))
+        this.publishLeaf('raw/inject/clip/set', JSON.stringify({ cmd, type, data }))
     }
 
     send_packet(buf: Buffer) {
