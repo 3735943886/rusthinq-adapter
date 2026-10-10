@@ -10,7 +10,11 @@
     // "storage_path": "./ha-state"
   },
 
-  // Must match the *rusthinq* daemon's config.toml [mqtt] section - same broker, same prefixes.
+  // 0.1: MQTT is the default when transport is omitted.
+  // 0.2: replace this block with { "transport": "management",
+  //   "api_url": "http://rusthinq:8080/", "user": "adapter",
+  //   "password": "your-password", "skip_ids": [] }.
+  // Omit both user and password if the management API has no authentication.
   "rusthinq": {
     "mqtt_url": "mqtt://localhost:1883",
     "mqtt_user": "",

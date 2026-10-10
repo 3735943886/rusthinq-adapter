@@ -1,16 +1,16 @@
 # rusthinq-adapter
 
 Runs [rethink](https://github.com/anszom/rethink)'s LG ThinQ device converters and Home
-Assistant bridge against rusthinq's raw wire-frame MQTT bus, instead of rethink's own
+Assistant bridge against rusthinq 0.1's raw MQTT bus or 0.2's management API, instead of rethink's own
 TLS/cloud tunnel. rusthinq owns the actual cloud connection and CLIP protocol; this process
-only taps/injects the already-decoded bytes over MQTT, so it needs no certificates, no
-listening ports, and no knowledge of the tunnel — it can run anywhere that can reach the
-same broker, started and stopped independently of rusthinq itself.
+only receives decoded frames and sends commands over MQTT or the management API. It
+needs no device certificates or listening ports and runs independently of rusthinq.
 
-This repo owns only two files: [`rusthinq-adapter.ts`](rusthinq-adapter.ts) (entrypoint) and
+The adapter entrypoint and transport implementations are owned here: [`rusthinq-adapter.ts`](rusthinq-adapter.ts) (entrypoint) and
 [`cloud/thinq2/rusthinq_transport.ts`](cloud/thinq2/rusthinq_transport.ts) (how a `Device` is
-synthesized from rusthinq's `<raw_prefix>/devices` snapshot and `<raw_prefix>/<id>/raw/rx`
-topics — see rusthinq's `raw_bus.rs` / `devlist.rs`). Everything else those two files import
+synthesized from rusthinq's `<rusthinq_prefix>/devices` snapshot and `<raw_prefix>/<id>/raw/rx`
+topics — see rusthinq's `raw_bus.rs` / `devlist.rs`). The new `cloud/thinq2/management_transport.ts` implements the 0.2 API transport.
+Everything else these files import
 — the per-device-model converters, the Home Assistant bridge, and supporting utility code —
 belongs to rethink and is **not fetched or vendored by this repo**. You bring your own rethink
 checkout to `./rethink`, and `tsconfig.json`'s `@/*` path alias resolves straight into it.
@@ -55,6 +55,11 @@ cp rusthinq-adapter-config.jsonc config.jsonc   # edit mqtt/rusthinq/homeassista
 npm run dev -- config.jsonc
 ```
 
+### rusthinq 0.1 (existing MQTT transport)
+
+Existing configurations remain valid: omitting `transport` selects MQTT. You can also
+set `"transport": "mqtt"` explicitly.
+
 Point rusthinq's `config.toml` `[mqtt] raw_prefix` and this project's `rusthinq`
 config section at the same broker and prefix, and list the raw streams this adapter
 uses in rusthinq's `[mqtt] raw` (rusthinq turns every raw stream off unless listed):
@@ -74,6 +79,45 @@ raw = ["rx", "inject", "inject_clip"]
 Without `inject_clip` the converters still work, but only see values as often as they poll.
 Needs a rusthinq build whose raw topics are laid out this way (`raw/inject/clip/set`; older
 builds had `raw/inject-clip/set`).
+
+### rusthinq 0.2 (management API transport)
+
+Replace the `rusthinq` block in your adapter config with:
+
+```json
+"rusthinq": {
+  "transport": "management",
+  "api_url": "http://127.0.0.1:8080/",
+  "user": "adapter",
+  "password": "your-password",
+  "skip_ids": []
+}
+```
+
+Use the daemon's actual management address. Omit both `user` and `password` if
+management authentication is disabled; otherwise supply both. HTTP requests and
+WebSocket upgrades use HTTP Basic authentication. HTTPS URLs use WSS for events;
+a reverse proxy must allow WebSocket upgrades. `api_url` can include a proxy base
+path and must not contain credentials, a query or a fragment.
+
+This requires the 0.2 management endpoints `GET /api/devices`, WebSocket
+`/api/events`, and `POST /api/devices/{id}/packet` and `/clip`. Packet requests carry
+`incarnation`, `generation`, and `hex`; CLIP requests carry the two scope fields
+plus `cmd`, `type`, and `data`. The daemon generates the CLIP message ID.
+No Rhai driver, external MQTT connection to rusthinq, or raw-injection toggle is
+required. Home Assistant still uses its separately configured MQTT connection.
+
+Only online ThinQ2 devices with a known modelId are attached. The API transport
+recreates converters after session/model changes, reconnects, or event loss so
+startup queries refresh their cached values. A lost connection closes all attached
+devices immediately; reconnection is attempted every two seconds. Commands are serialized per device with a bounded queue (128 pending commands). Unknown or failed
+command delivery is logged and never automatically retried. `Sent` means transport
+write completion, not appliance acknowledgement or confirmed state change.
+
+Use `skip_ids` to leave devices to other consumers. For devices this adapter drives,
+do not also install an active appliance Rhai driver: both can send commands.
+There is no automatic fallback between management and MQTT transports. ThinQ1
+support is outside this adapter's current scope.
 
 ### Running 24/7
 
@@ -122,3 +166,10 @@ build`/`npm start` locally) — a plain restart of the running container does no
 ```sh
 npm test
 ```
+
+The optional `bridge.storage_path` reservation relay store is supported when the
+provided rethink checkout includes `bridge/reservation-store.ts`. Upstream checkouts
+without it log that this setting is unavailable and run without that store.
+Home Assistant `storage_path` likewise depends on the chosen rethink checkout.
+Device delivery ACKs remain rusthinq's responsibility; converter `send_ack` calls
+are suppressed in both transports to avoid duplicate ACKs.

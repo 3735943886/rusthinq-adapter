@@ -153,3 +153,15 @@ describe('RusthinqTransportSource', () => {
         ])
     })
 })
+
+test('newer rethink converter ACK requests do not create a second ACK owner', () => {
+    const { client, published } = fakeClient()
+    const source = new RusthinqTransportSource(CONFIG, () => client as never)
+    source.on('newDevice', (device) => device.send_ack(Buffer.from('aa', 'hex')))
+    client.emit(
+        'message',
+        'rusthinq/devices',
+        Buffer.from(snapshot({ device: { model: 'MODEL', platform: 'thinq2' } })),
+    )
+    assert.equal(published.length, 0)
+})

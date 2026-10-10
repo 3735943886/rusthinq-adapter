@@ -28,7 +28,14 @@
   // 'mqtt-connection', which ships no types of its own) aren't picked up just by being imported
   // like the rest of rethink's code - they only take effect as tsc roots, same as rethink's own
   // tsconfig.json treats them.
-  "include": ["./*.ts", "./cloud/**/*.ts", "./scripts/**/*.ts", "./tests/**/*.ts", "./rethink/types/**/*.d.ts"],
+  "include": [
+    "./*.ts",
+    "./cloud/**/*.ts",
+    "./scripts/**/*.ts",
+    "./tests/**/*.ts",
+    "./rethink/types/**/*.d.ts",
+    "./rethink/bridge/reservation-store.ts"
+  ],
   "exclude": ["dist", "node_modules"],
 
   "tsc-alias": {

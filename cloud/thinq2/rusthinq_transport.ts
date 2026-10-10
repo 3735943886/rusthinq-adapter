@@ -24,6 +24,7 @@ type DeviceEvents = {
 }
 
 export type RusthinqTransportConfig = {
+    transport?: 'mqtt'
     mqtt_url: string
     mqtt_user?: string
     mqtt_pass?: string
@@ -79,6 +80,10 @@ class RusthinqTransportDevice extends TypedEmitter<DeviceEvents> {
         // register_inject never sees it, and there's no error path back to us.
         this.publishLeaf('raw/inject/clip/set', JSON.stringify({ cmd, type, data }))
     }
+
+    // rusthinq owns local/cloud ACK selection. rethink's newer AABB converters
+    // request these too; suppress them to avoid a second ACK owner.
+    send_ack(_packet: Buffer) {}
 
     send_packet(buf: Buffer) {
         this.emit('sendData', buf)
