@@ -4,7 +4,7 @@
   "description": "Runs rethink's LG ThinQ device converters and Home Assistant bridge against rusthinq's raw wire-frame MQTT bus, so rusthinq doesn't need its own per-device handlers.",
   "dependencies": {
     "@peculiar/x509": "^1.14.0",
-    "express": "^4.22.1",
+    "express": "^4.22.3",
     "fast-xml-parser": "^5.3.3",
     "mqtt": "^5.3.0",
     "mqtt-connection": "^4.1.0",
